@@ -1,0 +1,43 @@
+version: '2.1'
+ 
+services:
+  SampleSqlServer:
+     image: microsoft/mssql-server-linux
+     ports:
+       - 1433:1433
+     environment:
+       - ACCEPT_EULA=Y
+       - SA_PASSWORD=1q2w3e4r5t_
+     networks:
+       mynet:
+         ipv4_address: 172.19.0.2     
+
+  DBInit:
+    image: sampledbinit
+    ports:
+      - 84:80
+    environment:
+      - DBInit=true
+      - ASPNETCORE_ENVIRONMENT=Docker
+    depends_on:
+      - SampleSqlServer
+    networks:
+      mynet:
+        ipv4_address: 172.19.0.3
+
+  samplewebapi:
+     image: samplewebapi
+     ports:
+       - 85:80
+     depends_on:
+       - "SampleSqlServer"
+     networks:
+       mynet:
+         ipv4_address: 172.19.0.4
+       
+networks:
+  mynet:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.19.0.0/24       
